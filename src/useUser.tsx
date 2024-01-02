@@ -7,17 +7,12 @@ const MY_PROFILE_MUTATION = gql`
     myProfile {
       id
       username
+      githubUsername
       email
-      summary
-      avatar
-      totalWin
-      totalLose
-      score
-      Match {
-        matchId
-      }
+      avatarUrl
+      name
+      location
     }
-  }
 `;
 
 function useUser() {

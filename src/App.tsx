@@ -4,6 +4,9 @@ import Loader from "./components/Loader";
 import { ThemeProvider } from "styled-components";
 import { useReactiveVar } from "@apollo/client";
 import { darkModeVar, darkTheme, lightTheme } from "./theme";
+import Login from "./screens/Login";
+import Signup from "./screens/Signup";
+import Header from "./components/Header";
 const Home = lazy(() => import("./screens/Home"));
 
 function App() {
@@ -11,8 +14,11 @@ function App() {
   return (
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <Suspense fallback={<Loader />}>
+        <Header />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </Suspense>
     </ThemeProvider>
