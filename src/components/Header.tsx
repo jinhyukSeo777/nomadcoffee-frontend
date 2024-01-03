@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { styled } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { isLoggedInVar, logUserOut } from "../apollo";
-import { greenColor } from "../color";
+import { brownColor } from "../color";
 
 const Container = styled.div<{ scrollposition: number }>`
   width: 100%;
@@ -32,17 +32,14 @@ const LeftSpan = styled.span`
 const RightSpan = styled.span`
   font-weight: 500;
   font-size: 16px;
-  margin-left: 24px;
+  margin-left: 15px;
   cursor: pointer;
-  &:nth-last-child(1),
-  &:nth-last-child(2) {
-    padding: 14px;
-    border-radius: 6px;
-    color: ${greenColor};
-    &:hover {
-      background-color: ${greenColor};
-      color: white;
-    }
+  padding: 14px;
+  border-radius: 6px;
+  color: ${brownColor};
+  &:hover {
+    background-color: ${brownColor};
+    color: white;
   }
 `;
 
@@ -70,6 +67,9 @@ const Header = () => {
         <LeftSpan onClick={() => navigate("/")}>GOGOcoffee</LeftSpan>
       </Column>
       <Column>
+        {isLoggedInVar() ? (
+          <RightSpan onClick={() => navigate("/add")}>매장등록</RightSpan>
+        ) : null}
         {isLoggedInVar() ? (
           <RightSpan>내 정보</RightSpan>
         ) : (

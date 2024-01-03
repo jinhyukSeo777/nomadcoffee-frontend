@@ -7,6 +7,8 @@ import { darkModeVar, darkTheme, lightTheme } from "./theme";
 import Login from "./screens/Login";
 import Signup from "./screens/Signup";
 import Header from "./components/Header";
+import CreateCoffeeShop from "./screens/CreateCoffeeShop";
+import Detail from "./screens/Detail";
 const Home = lazy(() => import("./screens/Home"));
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/add" element={<CreateCoffeeShop />} />
+          <Route path="/shop/:id" element={<Detail />} />
         </Routes>
       </Suspense>
     </ThemeProvider>

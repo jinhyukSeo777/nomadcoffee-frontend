@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { isLoggedInVar, logUserOut } from "./apollo";
 
 const MY_PROFILE_MUTATION = gql`
-  query myProfile {
+  query Query {
     myProfile {
       id
       username
@@ -13,6 +13,7 @@ const MY_PROFILE_MUTATION = gql`
       name
       location
     }
+  }
 `;
 
 function useUser() {

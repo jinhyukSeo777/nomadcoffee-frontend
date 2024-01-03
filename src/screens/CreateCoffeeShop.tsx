@@ -1,26 +1,25 @@
 import { styled } from "styled-components";
 import { motion } from "framer-motion";
-import { faComment } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useForm } from "react-hook-form";
 import { gql, useMutation } from "@apollo/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { brownColor } from "../color";
 
-const CREATE_ACCOUNT_MUTATION = gql`
-  mutation CreateAccount(
-    $username: String!
-    $password: String!
-    $email: String!
+const CREATE_COFFEESHOP_MUTATION = gql`
+  mutation Mutation(
     $name: String!
-    $location: String!
+    $latitude: String!
+    $longitude: String!
+    $categories: String
+    $photo: Upload!
   ) {
-    createAccount(
-      username: $username
-      password: $password
-      email: $email
+    createCoffeeShop(
       name: $name
-      location: $location
+      latitude: $latitude
+      longitude: $longitude
+      categories: $categories
+      photo: $photo
     ) {
       ok
       error
@@ -35,15 +34,15 @@ export const Overlay = styled(motion.div)`
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
 `;
 
 export const LoginBox = styled.div`
   width: 600px;
-  height: 750px;
+  height: 700px;
   border-radius: 7px;
   background-color: white;
   overflow: scroll;
@@ -142,28 +141,8 @@ const Button = styled.button`
   background-color: #69d802;
   &:first-child {
     color: white;
-    background-color: #69d802;
+    background-color: ${brownColor};
   }
-  &:last-child {
-    color: black;
-    background-color: yellow;
-  }
-`;
-
-const KaKaoDiv = styled.div`
-  width: 440px;
-  height: 60px;
-  border-radius: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 8px 0;
-  cursor: pointer;
-  border: none;
-  color: black;
-  background-color: yellow;
 `;
 
 const ErrorMsg = styled.span`
@@ -171,6 +150,32 @@ const ErrorMsg = styled.span`
   color: #df4d4d;
   font-size: 15px;
   font-weight: 600;
+`;
+
+const PhotoDiv = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 30px;
+`;
+
+const Photo = styled.div<{ url: string | null }>`
+  width: 50px;
+  height: 50px;
+  border-radius: 10%;
+  margin-top: 10px;
+  margin-right: 10px;
+  background-image: url(${({ url }) => url});
+  background-size: cover;
+  background-position: center;
+`;
+
+const Label = styled.label`
+  margin: 15px 0 0px 0;
+  font-weight: bold;
+  font-size: 15px;
+  color: #0095f6;
+  display: inline-block;
+  cursor: pointer;
 `;
 
 export const overlayVariants = {
@@ -186,16 +191,16 @@ export const overlayVariants = {
 };
 
 interface FormData {
-  username: string;
-  password: string;
-  email: string;
-  summary: string;
   name: String;
-  location: String;
+  latitude: String;
+  longitude: String;
+  categories: String;
 }
 
-const Signup = () => {
+const CreateCoffeeShop = () => {
   const [errorMsg, setErrorMsg] = useState("");
+  const [photoFile, setPhotoFile] = useState();
+  const [newPhoto, setPhoto] = useState("");
 
   const {
     register,
@@ -208,24 +213,50 @@ const Signup = () => {
 
   const onCompleted = (data: any) => {
     const {
-      createAccount: { ok, error },
+      createCoffeeShop: { ok, error },
     } = data;
     if (!ok) {
       setErrorMsg(error);
     } else {
-      navigate("/login");
+      navigate("/");
       window.location.reload();
     }
   };
-  const [createAccount, loading] = useMutation(CREATE_ACCOUNT_MUTATION, {
+  const [createCoffeeShop, loading] = useMutation(CREATE_COFFEESHOP_MUTATION, {
     onCompleted,
   });
 
   const onSubmitValid = () => {
-    const { username, password, email, name, location } = getValues();
-    createAccount({
-      variables: { username, password, email, name, location },
+    if (!photoFile) {
+      setErrorMsg("photo required.");
+      return;
+    }
+    const { name, latitude, longitude, categories } = getValues();
+    createCoffeeShop({
+      variables: {
+        name,
+        latitude,
+        longitude,
+        categories,
+        photo: photoFile,
+      },
     });
+  };
+
+  const onChange = (e: any) => {
+    if (e.target.files.length === 0) return;
+    const {
+      target: {
+        files: [file],
+      },
+    } = e;
+    setPhotoFile(file);
+
+    var reader = new FileReader();
+    reader.onload = function (event: any) {
+      setPhoto(event.target.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
   };
 
   return (
@@ -237,65 +268,69 @@ const Signup = () => {
     >
       <LoginBox>
         <LoginBoxHeader>
-          <span>WELCOME</span>
+          <span>Enroll</span>
         </LoginBoxHeader>
         <LoginBoxContent>
           <Form onSubmit={handleSubmit(onSubmitValid)}>
             <Input
-              isvalid={!errors?.username ? "true" : "false"}
-              {...register("username", { required: true })}
-              type="text"
-              name="username"
-              placeholder="유저네임을 입력해주세요"
-            ></Input>
-            <Input
-              {...register("password", {
-                required: true,
-              })}
-              name="password"
-              autoComplete="off"
-              isvalid={!errors?.password ? "true" : "false"}
-              type="password"
-              placeholder="비밀번호를 입력해주세요"
-            ></Input>
-            <Input
-              {...register("email", {
-                required: true,
-              })}
-              name="email"
-              isvalid={!errors?.email ? "true" : "false"}
-              type="email"
-              placeholder="이메일을 입력해주세요"
-            ></Input>
-            <Input
-              {...register("name")}
-              name="name"
               isvalid={!errors?.name ? "true" : "false"}
+              {...register("name", { required: true })}
               type="text"
-              placeholder="이름을 입력해주세요"
+              name="name"
+              placeholder="가게명을 입력해주세요"
             ></Input>
             <Input
-              {...register("location")}
-              name="location"
-              isvalid={!errors?.location ? "true" : "false"}
+              {...register("latitude", {
+                required: true,
+              })}
+              name="latitude"
+              isvalid={!errors?.latitude ? "true" : "false"}
               type="text"
-              placeholder="위치를 입력해주세요"
+              placeholder="위도를 입력해주세요"
+            ></Input>
+            <Input
+              {...register("longitude", {
+                required: true,
+              })}
+              name="longitude"
+              isvalid={!errors?.longitude ? "true" : "false"}
+              type="text"
+              placeholder="경도을 입력해주세요"
+            ></Input>
+            <Input
+              {...register("categories")}
+              name="categories"
+              isvalid={!errors?.categories ? "true" : "false"}
+              type="text"
+              placeholder="카테고리를 입력해주세요 ex) #넓은 #깔끔한"
             ></Input>
             <ErrorMsg>{errorMsg}</ErrorMsg>
+            <PhotoDiv
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginTop: "30px",
+              }}
+            >
+              {newPhoto ? <Photo url={newPhoto}></Photo> : null}
+              <Label className="signup-profileImg-label" htmlFor="photoImg">
+                이미지 업로드
+              </Label>
+              <input
+                style={{ display: "none" }}
+                type="file"
+                accept="image/*"
+                id="photoImg"
+                onChange={(e: any) => onChange(e)}
+              />
+            </PhotoDiv>
             <Div style={{ marginTop: "50px" }}>
               <Button
                 disabled={loading.loading ? true : false}
                 style={{ opacity: loading.loading ? "0.5" : "1" }}
               >
-                회원가입
+                커피숍 등록
               </Button>
-              <KaKaoDiv>
-                <FontAwesomeIcon
-                  icon={faComment}
-                  style={{ fontSize: "27px", marginRight: "12px" }}
-                />
-                카카오 로그인
-              </KaKaoDiv>
             </Div>
           </Form>
         </LoginBoxContent>
@@ -304,4 +339,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default CreateCoffeeShop;
